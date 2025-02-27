@@ -12,7 +12,7 @@ contract FundMe {
 
     mapping(address => uint256) public fundersToAmount;
 
-    uint256 MINIMUM_VALUE = 1 * 10 ** 18;
+    uint256 MINIMUM_VALUE = 100 * 10 ** 18;
 
     AggregatorV3Interface internal dataFeed;
 
@@ -21,7 +21,7 @@ contract FundMe {
     }
 
     function fund() external payable {
-        require(msg.value >= MINIMUM_VALUE, "Send more ETH, At least 1 ETH");
+        require(convertEthToUsd(msg.value) >= MINIMUM_VALUE, "Send more ETH, At least 1 ETH");
         fundersToAmount[msg.sender] = msg.value;
     }
 
@@ -38,6 +38,11 @@ contract FundMe {
             /*uint80 answeredInRound*/
         ) = dataFeed.latestRoundData();
         return answer;
+    }
+
+    function convertEthToUsd(uint256 ethAmount) internal view returns(uint256) {
+        uint256 ethPrice = uint256(getChainlinkDataFeedLatestAnswer());
+        return ethAmount * ethPrice / (10 ** 8);
     }
 
 }
